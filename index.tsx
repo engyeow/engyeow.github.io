@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
 
-// --- Shared Types ---
+// --- Shared Types --- 
 enum AppScreen {
   OPENING = 'OPENING',
   BUILDUP = 'BUILDUP',
