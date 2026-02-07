@@ -193,7 +193,7 @@ const App: React.FC = () => {
 
       {/* Main Content Container */}
       <div 
-        className="relative z-10 w-[94%] max-w-lg bg-white/55 backdrop-blur-md rounded-[2.5rem] hand-drawn-border shadow-2xl transition-all duration-500 no-scrollbar overflow-hidden" 
+        className="relative z-10 w-[94%] max-w-lg bg-white/35 backdrop-blur-md rounded-[2.5rem] hand-drawn-border shadow-2xl transition-all duration-500 no-scrollbar overflow-hidden" 
         style={{ 
           transform: `scale(${scaleFactor})`, 
           transformOrigin: 'center center', 
