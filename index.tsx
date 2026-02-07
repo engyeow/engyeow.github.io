@@ -58,29 +58,30 @@ const Flower: React.FC<{ className?: string; style?: React.CSSProperties }> = ({
   </svg>
 );
 
-// --- Main App Component ---
 const App: React.FC = () => {
   const [screen, setScreen] = useState<AppScreen>(AppScreen.OPENING);
   const [idleText, setIdleText] = useState<string>('');
   const [honeyDrops, setHoneyDrops] = useState<HoneyDrop[]>([]);
   const [scaleFactor, setScaleFactor] = useState(1);
+  const [isLandscape, setIsLandscape] = useState(false);
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Resize logic to ensure everything fits in the container without overscroll
   useEffect(() => {
     const handleResize = () => {
       const h = window.innerHeight;
       const w = window.innerWidth;
+      const landscape = w > h;
+      setIsLandscape(landscape);
       
-      // Target container dimensions (we aim for ~700px height ideally)
-      const targetHeight = 740;
-      const targetWidth = h > w ? 380 : 600;
+      // Adjusted target height to be more realistic for landscape fitting
+      const targetHeight = landscape ? 600 : 780;
+      const targetWidth = landscape ? 650 : 380;
 
       const hScale = h / targetHeight;
       const wScale = w / targetWidth;
       
       const newScale = Math.min(1, hScale, wScale);
-      setScaleFactor(Math.max(0.4, newScale));
+      setScaleFactor(Math.max(0.35, newScale));
     };
 
     handleResize();
@@ -117,63 +118,63 @@ const App: React.FC = () => {
   };
 
   const renderContent = () => {
-    const iconBaseSize = 80;
+    const iconBaseSize = isLandscape ? 60 : 85;
     switch (screen) {
       case AppScreen.OPENING:
         return (
-          <div className="flex flex-col items-center text-center px-4 animate-in fade-in duration-700">
-            <Flower style={{ width: iconBaseSize, height: iconBaseSize }} className="mb-4 floating" />
-            <h1 className="text-3xl md:text-5xl text-[#5d4037] mb-3 storybook-font font-bold">Hello Matilda 🌼</h1>
-            <p className="text-xl md:text-2xl text-[#5d4037] mb-6 max-w-md leading-relaxed font-bold">
+          <div className="flex flex-col items-center text-center px-4 animate-in fade-in duration-700 landscape-compact">
+            <Flower style={{ width: iconBaseSize, height: iconBaseSize }} className="mb-2 md:mb-4 floating" />
+            <h1 className="text-3xl md:text-5xl text-[#5d4037] mb-1 md:mb-3 storybook-font font-bold">Hello Matilda 🌼</h1>
+            <p className="text-lg md:text-2xl text-[#5d4037] mb-4 md:mb-6 max-w-md leading-relaxed font-bold">
               I was just sitting here, thinking…<br/>
-              <span className="text-lg italic font-normal text-[#8d6e63]">(which is often hard work)</span>
+              <span className="text-base md:text-lg italic font-normal text-[#8d6e63]">(which is often hard work)</span>
             </p>
-            <button onClick={() => handleAction(AppScreen.BUILDUP)} className="bg-[#fbc02d] text-[#5d4037] px-8 py-3 rounded-full text-xl md:text-2xl hand-drawn-border hover:bg-[#fdd835] transition-all transform hover:scale-105 active:scale-95 shadow-lg flex items-center gap-3">
+            <button onClick={() => handleAction(AppScreen.BUILDUP)} className="bg-[#fbc02d] text-[#5d4037] px-8 py-2 md:py-3 rounded-full text-lg md:text-2xl hand-drawn-border hover:bg-[#fdd835] transition-all transform hover:scale-105 active:scale-95 shadow-lg flex items-center gap-3">
               <span>🍯</span> Oh? What is it?
             </button>
           </div>
         );
       case AppScreen.BUILDUP:
         return (
-          <div className="flex flex-col items-center text-center px-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <Bee style={{ width: iconBaseSize, height: iconBaseSize }} className="mb-4 floating" />
-            <p className="text-xl md:text-3xl text-[#5d4037] mb-6 max-w-lg leading-relaxed storybook-font font-bold">
+          <div className="flex flex-col items-center text-center px-4 animate-in fade-in slide-in-from-bottom-4 duration-500 landscape-compact">
+            <Bee style={{ width: iconBaseSize, height: iconBaseSize }} className="mb-2 md:mb-4 floating" />
+            <p className="text-xl md:text-3xl text-[#5d4037] mb-4 md:mb-6 max-w-lg leading-relaxed storybook-font font-bold">
               Valentine's Day is coming soon.<br/>And I have no honey plans.<br/>Which is so very sad.
             </p>
-            <button onClick={() => handleAction(AppScreen.THE_ASK)} className="bg-[#c5e1a5] text-[#5d4037] px-8 py-3 rounded-full text-xl md:text-2xl hand-drawn-border hover:bg-[#dcedc8] transition-all transform hover:scale-105 active:scale-95 shadow-lg flex items-center gap-3">
+            <button onClick={() => handleAction(AppScreen.THE_ASK)} className="bg-[#c5e1a5] text-[#5d4037] px-8 py-2 md:py-3 rounded-full text-lg md:text-2xl hand-drawn-border hover:bg-[#dcedc8] transition-all transform hover:scale-105 active:scale-95 shadow-lg flex items-center gap-3">
               <span>🐝</span> Go on…
             </button>
           </div>
         );
       case AppScreen.THE_ASK:
         return (
-          <div className="flex flex-col items-center text-center px-4 animate-in zoom-in duration-500">
-            <HoneyPot style={{ width: iconBaseSize * 1.2, height: iconBaseSize * 1.4 }} className="mb-2 floating" />
-            <p className="text-xl md:text-2xl text-[#5d4037] mb-1 storybook-font">So I thought to ask you</p>
-            <p className="text-lg text-[#8d6e63] mb-4 italic">very politely, and with plenty of fun</p>
-            <h2 className="text-3xl md:text-4xl text-[#d4a017] mb-6 font-bold storybook-font">Would you be my Valentine? 💛</h2>
-            <div className="flex flex-col gap-2 w-full max-w-xs md:max-w-sm">
-              <button onClick={() => handleAction(AppScreen.SUCCESS)} className="bg-[#fbc02d] text-[#5d4037] py-2.5 rounded-full text-lg md:text-xl hand-drawn-border hover:bg-[#fdd835] transition-all shadow-md"><span>🍯</span> Yes (this feels correct)</button>
-              <button onClick={() => handleAction(AppScreen.SUCCESS)} className="bg-[#fff176] text-[#5d4037] py-2.5 rounded-full text-lg md:text-xl hand-drawn-border hover:bg-[#fff59d] transition-all shadow-md"><span>🌻</span> Yes (with lots of food!)</button>
-              <button onClick={() => handleAction(AppScreen.SUCCESS)} className="bg-[#ffd54f] text-[#5d4037] py-2.5 rounded-full text-lg md:text-xl hand-drawn-border hover:bg-[#ffca28] transition-all shadow-md"><span>🐝</span> Yes (forever and always)</button>
+          <div className="flex flex-col items-center text-center px-4 animate-in zoom-in duration-500 landscape-compact">
+            <HoneyPot style={{ width: iconBaseSize * 1.1, height: iconBaseSize * 1.3 }} className="mb-1 md:mb-2 floating" />
+            <p className="text-lg md:text-2xl text-[#5d4037] mb-0 md:mb-1 storybook-font">So I thought to ask you</p>
+            <p className="text-sm md:text-lg text-[#8d6e63] mb-2 md:mb-4 italic landscape-hide">very politely, and with plenty of fun</p>
+            <h2 className="text-2xl md:text-4xl text-[#d4a017] mb-4 md:mb-6 font-bold storybook-font">Would you be my Valentine? 💛</h2>
+            <div className={`flex ${isLandscape ? 'flex-row gap-2' : 'flex-col gap-2'} w-full max-w-xs md:max-w-md`}>
+              <button onClick={() => handleAction(AppScreen.SUCCESS)} className="flex-1 bg-[#fbc02d] text-[#5d4037] py-2 rounded-full text-sm md:text-xl hand-drawn-border hover:bg-[#fdd835] transition-all shadow-md"><span>🍯</span> Yes</button>
+              <button onClick={() => handleAction(AppScreen.SUCCESS)} className="flex-1 bg-[#fff176] text-[#5d4037] py-2 rounded-full text-sm md:text-xl hand-drawn-border hover:bg-[#fff59d] transition-all shadow-md"><span>🌻</span> Definitely</button>
+              <button onClick={() => handleAction(AppScreen.SUCCESS)} className="flex-1 bg-[#ffd54f] text-[#5d4037] py-2 rounded-full text-sm md:text-xl hand-drawn-border hover:bg-[#ffca28] transition-all shadow-md"><span>🐝</span> Always</button>
             </div>
           </div>
         );
       case AppScreen.SUCCESS:
         return (
-          <div className="flex flex-col items-center text-center px-4 z-10 animate-in fade-in zoom-in-50 duration-1000">
-            <div className="flex gap-4 mb-2 items-end">
-              <HoneyPot style={{ width: iconBaseSize * 0.7, height: iconBaseSize * 0.9 }} className="floating" />
-              <Bee style={{ width: iconBaseSize * 0.4, height: iconBaseSize * 0.4 }} className="animate-bounce" />
+          <div className="flex flex-col items-center text-center px-4 z-10 animate-in fade-in zoom-in-50 duration-1000 landscape-compact">
+            <div className="flex gap-4 mb-1 md:mb-2 items-end">
+              <HoneyPot style={{ width: iconBaseSize * 0.6, height: iconBaseSize * 0.8 }} className="floating" />
+              <Bee style={{ width: iconBaseSize * 0.3, height: iconBaseSize * 0.3 }} className="animate-bounce" />
             </div>
-            <h1 className="text-2xl md:text-3xl text-[#5d4037] mb-1 storybook-font font-bold">Oh bother… how wonderful!</h1>
-            <p className="text-lg md:text-xl text-[#5d4037] mb-4 leading-relaxed max-w-md font-bold">I’m very glad I asked.<br/>I promise to share my honey.</p>
-            <div className="bg-[#fffde7] p-4 rounded-2xl hand-drawn-border shadow-md mb-4 max-w-xs w-full border-[#d4a017]">
-              <div className="text-[#d4a017] text-xl mb-1">🔥</div>
-              <h3 className="text-[#5d4037] text-lg font-bold storybook-font mb-1">Our Date Invitation:</h3>
-              <p className="text-[#5d4037] text-base md:text-lg font-bold leading-tight">Fireplace by Bedrock,<br/>One Holland Village #03-27<br/><span className="text-[#d4a017]">7PM • 14 February 2026</span></p>
+            <h1 className="text-xl md:text-3xl text-[#5d4037] mb-1 storybook-font font-bold">Oh bother… how wonderful!</h1>
+            <p className="text-base md:text-xl text-[#5d4037] mb-3 md:mb-4 leading-relaxed max-w-md font-bold">I’m very glad I asked.<br/>I promise to share my honey.</p>
+            <div className="bg-[#fffde7] p-3 md:p-4 rounded-2xl hand-drawn-border shadow-md mb-2 md:mb-4 max-w-xs w-full border-[#d4a017]">
+              <div className="text-[#d4a017] text-lg mb-0 landscape-hide">🔥</div>
+              <h3 className="text-[#5d4037] text-sm md:text-lg font-bold storybook-font mb-0 md:mb-1">Our Date Invitation:</h3>
+              <p className="text-[#5d4037] text-sm md:text-lg font-bold leading-tight">Fireplace by Bedrock,<br/>One Holland Village #03-27<br/><span className="text-[#d4a017]">7PM • 14 February 2026</span></p>
             </div>
-            <div className="p-3 bg-white/60 rounded-xl border border-dashed border-[#fbc02d] storybook-font text-base text-[#5d4037] max-w-md shadow-inner italic leading-snug">
+            <div className="p-2 md:p-3 bg-white/60 rounded-xl border border-dashed border-[#fbc02d] storybook-font text-xs md:text-base text-[#5d4037] max-w-md shadow-inner italic leading-snug landscape-hide">
               "A day without a friend is like a pot without a single drop of honey left inside."
             </div>
           </div>
@@ -190,13 +191,13 @@ const App: React.FC = () => {
         </div>
       ))}
 
-      {/* Main Content Container with Opacity and Scaling */}
+      {/* Main Content Container */}
       <div 
-        className="relative z-10 w-[94%] max-w-lg bg-white/70 backdrop-blur-sm rounded-[2.5rem] hand-drawn-border shadow-2xl transition-all duration-700 no-scrollbar overflow-hidden" 
+        className="relative z-10 w-[94%] max-w-lg bg-white/75 backdrop-blur-md rounded-[2.5rem] hand-drawn-border shadow-2xl transition-all duration-500 no-scrollbar overflow-hidden" 
         style={{ 
           transform: `scale(${scaleFactor})`, 
           transformOrigin: 'center center', 
-          padding: '2rem 1rem',
+          padding: isLandscape ? '1.5rem 1rem' : '2.5rem 1rem',
           maxHeight: '94vh'
         }}
       >
@@ -204,8 +205,8 @@ const App: React.FC = () => {
       </div>
 
       {/* Floating Hint Text */}
-      <div className="fixed bottom-10 left-0 w-full text-center pointer-events-none px-4 z-20">
-        {idleText && <p className="text-white text-xl md:text-2xl animate-bounce storybook-font font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{idleText}</p>}
+      <div className={`fixed ${isLandscape ? 'bottom-2' : 'bottom-10'} left-0 w-full text-center pointer-events-none px-4 z-20`}>
+        {idleText && <p className="text-white text-lg md:text-2xl animate-bounce storybook-font font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{idleText}</p>}
       </div>
     </div>
   );
