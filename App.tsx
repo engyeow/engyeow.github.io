@@ -3,30 +3,39 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { AppScreen, HoneyDrop } from './types';
 import { HoneyPot, Bee, Flower } from './Illustrations';
 
+const POOH_QUOTE = "\"A day without a friend is like a pot without a single drop of honey left inside.\"";
+
 const App: React.FC = () => {
   const [screen, setScreen] = useState<AppScreen>(AppScreen.OPENING);
   const [idleText, setIdleText] = useState<string>('');
   const [clickCount, setClickCount] = useState(0);
   const [honeyDrops, setHoneyDrops] = useState<HoneyDrop[]>([]);
   const [isPortrait, setIsPortrait] = useState(false);
-  const [isTooSmall, setIsTooSmall] = useState(false);
+  const [scaleFactor, setScaleFactor] = useState(1);
   const [isInAppBrowser, setIsInAppBrowser] = useState(false);
   
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [poohQuote] = useState<string>("\"A day without a friend is like a pot without a single drop of honey left inside.\"");
 
   useEffect(() => {
     const checkEnvironment = () => {
       const width = window.innerWidth;
       const height = window.innerHeight;
       
-      // 1. Check Portrait
+      // 1. Detect if the user is in portrait mode on a mobile-sized screen
       setIsPortrait(height > width && width < 1024);
       
-      // 2. Check if landscape is too cramped (height < 420px is common for small phones)
-      setIsTooSmall(width > height && height < 420);
+      // 2. Calculate dynamic scale factor for landscape
+      // We target a comfortable height of 650px.
+      if (width > height) {
+        const baseHeight = 650;
+        // Shrink the UI proportionally down to 60% of original size if the screen is very short (like Telegram in-app)
+        const newScale = Math.max(0.6, Math.min(1, height / baseHeight));
+        setScaleFactor(newScale);
+      } else {
+        setScaleFactor(1);
+      }
 
-      // 3. Detect In-App Browsers (Telegram, Instagram, etc)
+      // 3. Detect In-App Browsers to provide helpful context if needed
       const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
       const isTelegram = /Telegram/i.test(ua);
       const isInstagram = /Instagram/i.test(ua);
@@ -43,10 +52,11 @@ const App: React.FC = () => {
     if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
     setIdleText('');
     
+    // If not on the success screen, remind them Pooh is waiting
     if (screen !== AppScreen.SUCCESS) {
       idleTimerRef.current = setTimeout(() => {
         setIdleText('Pooh is waiting patiently. Mostly.');
-      }, 5000);
+      }, 6000);
     }
   }, [screen]);
 
@@ -58,12 +68,6 @@ const App: React.FC = () => {
   }, [resetIdleTimer]);
 
   const handleScreenTransition = (next: AppScreen) => {
-    try {
-      if (window.screen && window.screen.orientation && (window.screen.orientation as any).lock) {
-        (window.screen.orientation as any).lock('landscape').catch(() => {});
-      }
-    } catch (e) {}
-
     setScreen(next);
     setClickCount(0);
     if (next === AppScreen.SUCCESS) {
@@ -72,21 +76,24 @@ const App: React.FC = () => {
   };
 
   const startHoneyAnimation = () => {
-    const drops: HoneyDrop[] = Array.from({ length: 40 }).map((_, i) => ({
+    const drops: HoneyDrop[] = Array.from({ length: 45 }).map((_, i) => ({
       id: i,
       left: Math.random() * 100,
-      duration: 2 + Math.random() * 4,
-      size: 15 + Math.random() * 25
+      duration: 3 + Math.random() * 5,
+      size: 15 + Math.random() * 30
     }));
     setHoneyDrops(drops);
   };
 
   const renderScreen = () => {
+    // Dynamic icon size based on scaleFactor
+    const iconSize = 90 * scaleFactor;
+    
     switch (screen) {
       case AppScreen.OPENING:
         return (
           <div className="flex flex-col items-center text-center px-4 animate-in fade-in duration-1000">
-            <Flower className="w-16 h-16 md:w-20 md:h-20 mb-4 floating" />
+            <Flower style={{ width: iconSize, height: iconSize }} className="mb-4 floating" />
             <h1 className="text-3xl md:text-5xl text-[#5d4037] mb-4 storybook-font font-bold">
               Hello Matilda 🌼
             </h1>
@@ -96,7 +103,7 @@ const App: React.FC = () => {
             </p>
             <button
               onClick={() => handleScreenTransition(AppScreen.BUILDUP)}
-              className="bg-[#fbc02d] text-[#5d4037] px-8 py-3 rounded-full text-xl hand-drawn-border hover:bg-[#fdd835] transition-all transform hover:scale-105 active:scale-95 shadow-lg flex items-center gap-3"
+              className="bg-[#fbc02d] text-[#5d4037] px-10 py-4 rounded-full text-xl md:text-2xl hand-drawn-border hover:bg-[#fdd835] transition-all transform hover:scale-105 active:scale-95 shadow-lg flex items-center gap-3"
             >
               <span>🍯</span> Oh? What is it?
             </button>
@@ -106,7 +113,7 @@ const App: React.FC = () => {
       case AppScreen.BUILDUP:
         return (
           <div className="flex flex-col items-center text-center px-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <Bee className="w-14 h-14 md:w-16 md:h-16 mb-4 floating" />
+            <Bee style={{ width: iconSize * 0.9, height: iconSize * 0.9 }} className="mb-4 floating" />
             <p className="text-xl md:text-3xl text-[#5d4037] mb-8 max-w-lg leading-relaxed storybook-font font-bold">
               Valentine's Day is coming soon.<br/>
               And I have no honey plans.<br/>
@@ -114,7 +121,7 @@ const App: React.FC = () => {
             </p>
             <button
               onClick={() => handleScreenTransition(AppScreen.THE_ASK)}
-              className="bg-[#c5e1a5] text-[#5d4037] px-8 py-3 rounded-full text-xl hand-drawn-border hover:bg-[#dcedc8] transition-all transform hover:scale-105 active:scale-95 shadow-lg flex items-center gap-3"
+              className="bg-[#c5e1a5] text-[#5d4037] px-10 py-4 rounded-full text-xl md:text-2xl hand-drawn-border hover:bg-[#dcedc8] transition-all transform hover:scale-105 active:scale-95 shadow-lg flex items-center gap-3"
             >
               <span>🐝</span> Go on…
             </button>
@@ -124,7 +131,7 @@ const App: React.FC = () => {
       case AppScreen.THE_ASK:
         return (
           <div className="flex flex-col items-center text-center px-4 animate-in zoom-in duration-500">
-            <HoneyPot className="w-20 h-20 md:w-28 md:h-28 mb-4 floating" />
+            <HoneyPot style={{ width: iconSize * 1.3, height: iconSize * 1.6 }} className="mb-4 floating" />
             <p className="text-xl md:text-2xl text-[#5d4037] mb-1 storybook-font">
               So I thought to ask you
             </p>
@@ -137,21 +144,15 @@ const App: React.FC = () => {
             <div className="flex flex-col gap-3 w-full max-w-xs md:max-w-sm">
               <button
                 onClick={() => handleScreenTransition(AppScreen.SUCCESS)}
-                className="bg-[#fbc02d] text-[#5d4037] py-3 rounded-full text-lg hand-drawn-border hover:bg-[#fdd835] transition-all shadow-md flex items-center justify-center gap-2"
+                className="bg-[#fbc02d] text-[#5d4037] py-3 md:py-4 rounded-full text-lg md:text-xl hand-drawn-border hover:bg-[#fdd835] transition-all shadow-md flex items-center justify-center gap-2"
               >
                 <span>🍯</span> Yes (this feels correct)
               </button>
               <button
                 onClick={() => handleScreenTransition(AppScreen.SUCCESS)}
-                className="bg-[#fff176] text-[#5d4037] py-3 rounded-full text-lg hand-drawn-border hover:bg-[#fff59d] transition-all shadow-md flex items-center justify-center gap-2"
+                className="bg-[#fff176] text-[#5d4037] py-3 md:py-4 rounded-full text-lg md:text-xl hand-drawn-border hover:bg-[#fff59d] transition-all shadow-md flex items-center justify-center gap-2"
               >
-                <span>🌻</span> Yes (but only if there is food)
-              </button>
-              <button
-                onClick={() => handleScreenTransition(AppScreen.SUCCESS)}
-                className="bg-[#aed581] text-[#5d4037] py-3 rounded-full text-lg hand-drawn-border hover:bg-[#c5e1a5] transition-all shadow-md flex items-center justify-center gap-2"
-              >
-                <span>🐝</span> Let me think… (still yes)
+                <span>🌻</span> Yes (with lots of food!)
               </button>
             </div>
           </div>
@@ -159,10 +160,10 @@ const App: React.FC = () => {
 
       case AppScreen.SUCCESS:
         return (
-          <div className="flex flex-col items-center text-center px-4 z-10 animate-in fade-in zoom-in-50 duration-1000 overflow-y-auto max-h-[80vh]">
-            <div className="flex gap-4 mb-4">
-              <HoneyPot className="w-16 h-16 md:w-24 md:h-24 floating" />
-              <Bee className="w-8 h-8 md:w-12 md:h-12 animate-bounce" />
+          <div className="flex flex-col items-center text-center px-4 z-10 animate-in fade-in zoom-in-50 duration-1000">
+            <div className="flex gap-4 mb-4 items-end">
+              <HoneyPot style={{ width: iconSize, height: iconSize * 1.2 }} className="floating" />
+              <Bee style={{ width: iconSize * 0.6, height: iconSize * 0.6 }} className="animate-bounce" />
             </div>
             <h1 className="text-3xl md:text-5xl text-[#5d4037] mb-4 storybook-font font-bold">
               Oh bother… how wonderful!
@@ -172,8 +173,8 @@ const App: React.FC = () => {
               I promise to be brave, kind,<br/>
               and to always share my honey.
             </p>
-            <div className="p-3 bg-[#fffde7]/90 rounded-2xl border-2 border-dashed border-[#fbc02d] storybook-font text-xl text-[#5d4037] max-w-md shadow-inner italic">
-              {poohQuote}
+            <div className="p-5 bg-[#fffde7]/95 rounded-2xl border-2 border-dashed border-[#fbc02d] storybook-font text-xl md:text-2xl text-[#5d4037] max-w-md shadow-inner italic">
+              {POOH_QUOTE}
             </div>
           </div>
         );
@@ -185,19 +186,16 @@ const App: React.FC = () => {
       className="min-h-screen w-full flex items-center justify-center relative overflow-hidden cursor-default"
       onClick={() => { setClickCount(prev => prev + 1); resetIdleTimer(); }}
     >
-      {/* 1. Telegram / In-App Browser Guide */}
-      {isInAppBrowser && !isPortrait && !isTooSmall && (
-        <div className="fixed top-4 left-4 right-4 z-[110] bg-[#fffde7]/95 p-4 rounded-2xl hand-drawn-border shadow-2xl animate-in slide-in-from-top-4 duration-500">
-          <div className="flex items-center gap-4">
-            <Bee className="w-10 h-10 flex-shrink-0" />
-            <p className="text-[#5d4037] text-lg storybook-font font-bold">
-              Oh Bother! Telegram's window is a bit tight. For the full honey experience, tap the <span className="text-[#d4a017]">⋮</span> and select <span className="underline">Open in Chrome/Safari</span>!
-            </p>
-          </div>
+      {/* Subtle In-App Browser Tooltip */}
+      {isInAppBrowser && !isPortrait && (
+        <div className="fixed top-2 left-1/2 -translate-x-1/2 z-[110] bg-[#fffde7]/90 px-5 py-1.5 rounded-full border-2 border-[#fbc02d] shadow-md pointer-events-none">
+          <p className="text-[#5d4037] text-sm storybook-font font-bold whitespace-nowrap">
+             🍯 Tip: For a bigger story, open in Chrome or Safari!
+          </p>
         </div>
       )}
 
-      {/* 2. Portrait Mode Guard */}
+      {/* Mobile Orientation Lock Alert */}
       {isPortrait && (
         <div className="fixed inset-0 z-[100] bg-[#fff9e6] flex flex-col items-center justify-center text-center p-10 animate-in fade-in duration-300">
           <Bee className="w-24 h-24 mb-6 floating" />
@@ -206,24 +204,11 @@ const App: React.FC = () => {
             This story is much better told sideways.<br/>
             Please rotate your device to landscape mode!
           </p>
-          <div className="mt-10 w-20 h-12 border-4 border-[#5d4037] rounded-lg animate-pulse rotate-90" />
+          <div className="mt-10 w-24 h-14 border-4 border-[#5d4037] rounded-lg animate-pulse rotate-90" />
         </div>
       )}
 
-      {/* 3. Small Landscape height guard */}
-      {isTooSmall && !isPortrait && (
-        <div className="fixed inset-0 z-[105] bg-[#fff9e6] flex flex-col items-center justify-center text-center p-6 animate-in fade-in duration-300 overflow-y-auto">
-          <HoneyPot className="w-16 h-16 mb-4" />
-          <h2 className="text-2xl text-[#5d4037] storybook-font font-bold mb-2">A Very Tight Squeeze!</h2>
-          <p className="text-lg text-[#8d6e63] storybook-font">
-            Your screen is a bit small for Pooh's big thoughts.<br/>
-            Try hiding your browser bars or using a bigger device!
-          </p>
-          <p className="mt-4 text-sm italic">(Current height is too short for the honey pots)</p>
-        </div>
-      )}
-
-      {/* Success Animation */}
+      {/* Golden Honey Rain for Success Screen */}
       {screen === AppScreen.SUCCESS && honeyDrops.map(drop => (
         <div 
           key={drop.id}
@@ -232,40 +217,47 @@ const App: React.FC = () => {
             left: `${drop.left}%`,
             top: `-50px`,
             animationDuration: `${drop.duration}s`,
-            animationDelay: `${Math.random() * 2}s`
+            animationDelay: `${Math.random() * 3}s`
           }}
         >
           <svg width={drop.size} height={drop.size} viewBox="0 0 20 20">
-             <path d="M10 2C10 2 6 8 6 12C6 14.2 7.8 16 10 16C12.2 16 14 14.2 14 12C14 8 10 2 10 2Z" fill="#FBC02D" opacity="0.8" />
+             <path d="M10 2C10 2 6 8 6 12C6 14.2 7.8 16 10 16C12.2 16 14 14.2 14 12C14 8 10 2 10 2Z" fill="#FBC02D" opacity="0.75" />
           </svg>
         </div>
       ))}
 
-      {/* Main Container */}
-      <div className={`relative z-10 w-full max-w-2xl bg-white/85 backdrop-blur-sm p-6 md:p-12 rounded-[2.5rem] md:rounded-[3rem] hand-drawn-border mx-4 shadow-2xl transition-all duration-500 ${(isPortrait || isTooSmall) ? 'blur-md opacity-0' : 'opacity-100'}`}>
+      {/* Main Story Container (Dynamic Scaling) */}
+      <div 
+        className={`relative z-10 w-full max-w-2xl bg-white/90 backdrop-blur-md rounded-[3rem] hand-drawn-border mx-4 shadow-2xl transition-all duration-700 ${isPortrait ? 'blur-md opacity-0' : 'opacity-100'}`}
+        style={{ 
+          transform: `scale(${scaleFactor})`,
+          transformOrigin: 'center center',
+          padding: `${3 * scaleFactor}rem` 
+        }}
+      >
         {renderScreen()}
       </div>
 
-      {/* Easter Egg Messages */}
-      {!isPortrait && !isTooSmall && (
-        <div className="fixed bottom-12 left-0 w-full text-center pointer-events-none px-4">
+      {/* Idle Easter Egg Text */}
+      {!isPortrait && (
+        <div className="fixed bottom-10 left-0 w-full text-center pointer-events-none px-4">
           {idleText && (
-            <p className="text-white text-2xl md:text-3xl animate-bounce storybook-font font-bold drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+            <p className="text-white text-xl md:text-3xl animate-bounce storybook-font font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
               {idleText}
             </p>
           )}
-          {clickCount > 8 && screen !== AppScreen.SUCCESS && (
-            <p className="text-white text-lg storybook-font italic font-bold drop-shadow-md">
-              Thinking… thinking… still thinking very hard…
+          {clickCount > 10 && screen !== AppScreen.SUCCESS && (
+            <p className="text-[#fbc02d] text-lg storybook-font italic font-bold drop-shadow-md">
+               "Sometimes the smallest things take up the most room in your heart."
             </p>
           )}
         </div>
       )}
 
-      {/* Footer Year */}
-      {!isPortrait && !isTooSmall && (
-        <div className="fixed bottom-4 right-6 text-white text-xl md:text-2xl storybook-font font-bold drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
-          Hundred Acre Wood, 2026
+      {/* Decorative Signature */}
+      {!isPortrait && (
+        <div className="fixed bottom-6 right-8 text-white/80 text-lg md:text-2xl storybook-font font-bold drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
+          With Love, From Pooh • 2026
         </div>
       )}
     </div>
