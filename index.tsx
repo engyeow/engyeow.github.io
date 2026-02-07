@@ -187,7 +187,7 @@ const App: React.FC = () => {
       {/* Falling honey animation */}
       {screen === AppScreen.SUCCESS && honeyDrops.map(drop => (
         <div key={drop.id} className="honey-drop" style={{ left: `${drop.left}%`, top: `-50px`, animationDuration: `${drop.duration}s`, animationDelay: `${Math.random() * 2}s` }}>
-          <svg width={drop.size} height={drop.size} viewBox="0 0 20 20"><path d="M10 2C10 2 6 8 6 12C6 14.2 7.8 16 10 16C12.2 16 14 14.2 14 12C14 8 10 2 10 2Z" fill="#FBC02D" opacity="0.65" /></svg>
+          <svg width={drop.size} height={drop.size} viewBox="0 0 20 20"><path d="M10 2C10 2 6 8 6 12C6 14.2 7.8 16 10 16C12.2 16 14 14.2 14 12C14 8 10 2 10 2Z" fill="#FBC02D" opacity="0.45" /></svg>
         </div>
       ))}
 
