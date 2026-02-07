@@ -18,7 +18,8 @@
         overflow: hidden;
         width: 100%;
         height: 100%;
-        position: fixed; /* Prevents bounce scroll on iOS */
+        position: fixed;
+        -webkit-overflow-scrolling: touch;
       }
       body {
         background-image: url('https://wallpapers-clan.com/wp-content/uploads/2024/05/winnie-the-pooh-sitting-on-meadow-desktop-wallpaper-cover.jpg');
@@ -26,9 +27,10 @@
         background-position: center bottom;
         background-repeat: no-repeat;
         font-family: 'Patrick Hand', cursive;
+        background-color: #fdf5e6;
       }
 
-      /* Portrait Orientation Background as requested */
+      /* Portrait Orientation Background */
       @media (orientation: portrait) {
         body {
           background-image: url('https://m.media-amazon.com/images/I/71RxvZNdCdL._AC_UF894,1000_QL80_.jpg');
@@ -39,14 +41,16 @@
       .storybook-font {
         font-family: 'Gaegu', cursive;
       }
+
       @keyframes float {
         0% { transform: translateY(0px) rotate(0deg); }
-        50% { transform: translateY(-10px) rotate(3deg); }
+        50% { transform: translateY(-8px) rotate(2deg); }
         100% { transform: translateY(0px) rotate(0deg); }
       }
       .floating {
         animation: float 4s ease-in-out infinite;
       }
+
       .honey-drop {
         position: absolute;
         pointer-events: none;
@@ -56,19 +60,14 @@
       @keyframes fall {
         to { transform: translateY(110vh); }
       }
+
       .hand-drawn-border {
         border: 4px solid #5d4037;
         border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
       }
 
-      /* Hide scrollbar for clean UI */
-      .no-scrollbar::-webkit-scrollbar {
-        display: none;
-      }
-      .no-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-      }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
     <script type="importmap">
     {
