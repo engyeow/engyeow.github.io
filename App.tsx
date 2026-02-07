@@ -103,7 +103,7 @@ const App: React.FC = () => {
           <div className="flex flex-col items-center text-center px-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <Bee className="w-16 h-16 mb-6 floating" />
             <p className="text-2xl md:text-4xl text-[#5d4037] mb-10 max-w-lg leading-relaxed storybook-font font-bold">
-              Valentines Day is coming soon.<br/>
+              Valentine's Day is coming soon.<br/>
               And I have no honey plans.<br/>
               Which is so sad.
             </p>
@@ -167,7 +167,7 @@ const App: React.FC = () => {
               I promise to be brave, kind,<br/>
               and to always share my honey.
             </p>
-            <div className="mt-3 p-3 bg-[#fffde7]/90 rounded-2xl border-2 border-dashed border-[#fbc02d] storybook-font text-2xl text-[#5d4037] max-w-lg shadow-inner">
+            <div className="mt-3 p-4 bg-[#fffde7]/90 rounded-2xl border-2 border-dashed border-[#fbc02d] storybook-font text-2xl text-[#5d4037] max-w-lg shadow-inner italic">
               {poohQuote}
             </div>
           </div>
@@ -212,7 +212,7 @@ const App: React.FC = () => {
       ))}
 
       {/* Main Container */}
-      <div className={`relative z-10 w-full max-w-2xl bg-white/75 backdrop-blur-sm p-10 md:p-16 rounded-[3rem] hand-drawn-border mx-4 shadow-2xl transition-all duration-500 ${isPortrait ? 'blur-md' : ''}`}>
+      <div className={`relative z-10 w-full max-w-2xl bg-white/85 backdrop-blur-sm p-10 md:p-16 rounded-[3rem] hand-drawn-border mx-4 shadow-2xl transition-all duration-500 ${isPortrait ? 'blur-md' : ''}`}>
         {renderScreen()}
       </div>
 
@@ -220,21 +220,21 @@ const App: React.FC = () => {
       {!isPortrait && (
         <div className="fixed bottom-12 left-0 w-full text-center pointer-events-none px-4">
           {idleText && (
-            <p className="text-[#5d4037] text-2xl animate-bounce storybook-font font-bold drop-shadow-md">
+            <p className="text-white text-3xl animate-bounce storybook-font font-bold drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
               {idleText}
             </p>
           )}
           {clickCount > 5 && screen !== AppScreen.SUCCESS && (
-            <p className="text-[#5d4037] text-lg storybook-font italic font-bold">
+            <p className="text-white text-lg storybook-font italic font-bold drop-shadow-md">
               Thinking… thinking… still thinking very hard…
             </p>
           )}
         </div>
       )}
 
-      {/* Footer Quote Style */}
+      {/* Footer Year */}
       {screen !== AppScreen.SUCCESS && !isPortrait && (
-        <div className="fixed bottom-6 right-6 text-white text-xl storybook-font font-bold drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+        <div className="fixed bottom-6 right-6 text-white text-2xl storybook-font font-bold drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
           Hundred Acre Wood, 2026
         </div>
       )}
