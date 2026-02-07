@@ -45,13 +45,13 @@ const Bee: React.FC<{ className?: string; style?: React.CSSProperties }> = ({ cl
   </svg>
 );
 
-const Flower: React.FC<{ className?: string; style?: React.CSSProperties }> = ({ className, style }) => (
-  <svg viewBox="0 0 80 80" className={className} style={style} fill="none" xmlns="http://www.w3.org/2000/svg">
+const Flower: React.FC<{ className?: string; style?: React.CSSProperties; wilted?: boolean }> = ({ className, style, wilted }) => (
+  <svg viewBox="0 0 80 80" className={`${className} transition-transform duration-1000 ${wilted ? 'rotate-180 opacity-60' : ''}`} style={style} fill="none" xmlns="http://www.w3.org/2000/svg">
     {[...Array(12)].map((_, i) => (
-      <ellipse key={`outer-${i}`} cx="40" cy="16" rx="7" ry="16" fill="#FBC02D" stroke="#F9A825" strokeWidth="1.2" transform={`rotate(${i * 30} 40 40)`} />
+      <ellipse key={`outer-${i}`} cx="40" cy="16" rx="7" ry="16" fill={wilted ? "#BDBDBD" : "#FBC02D"} stroke={wilted ? "#9E9E9E" : "#F9A825"} strokeWidth="1.2" transform={`rotate(${i * 30} 40 40)`} />
     ))}
     {[...Array(12)].map((_, i) => (
-      <ellipse key={`inner-${i}`} cx="40" cy="20" rx="5" ry="12" fill="#FFEE58" stroke="#FBC02D" strokeWidth="1" transform={`rotate(${i * 30 + 15} 40 40)`} />
+      <ellipse key={`inner-${i}`} cx="40" cy="20" rx="5" ry="12" fill={wilted ? "#EEEEEE" : "#FFEE58"} stroke={wilted ? "#BDBDBD" : "#FBC02D"} strokeWidth="1" transform={`rotate(${i * 30 + 15} 40 40)`} />
     ))}
     <circle cx="40" cy="40" r="14" fill="#8D6E63" stroke="#5D4037" strokeWidth="2" />
     <circle cx="36" cy="36" r="4" fill="#A1887F" opacity="0.4" />
@@ -64,6 +64,11 @@ const App: React.FC = () => {
   const [honeyDrops, setHoneyDrops] = useState<HoneyDrop[]>([]);
   const [scaleFactor, setScaleFactor] = useState(1);
   const [isLandscape, setIsLandscape] = useState(false);
+  
+  // Typewriter state for the "No" button
+  const [noButtonText, setNoButtonText] = useState("No");
+  const [isTyping, setIsTyping] = useState(false);
+  
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -73,7 +78,6 @@ const App: React.FC = () => {
       const landscape = w > h;
       setIsLandscape(landscape);
       
-      // Adjusted target height to be more realistic for landscape fitting
       const targetHeight = landscape ? 600 : 780;
       const targetWidth = landscape ? 650 : 380;
 
@@ -117,6 +121,24 @@ const App: React.FC = () => {
     }
   };
 
+  const handleNoClick = async () => {
+    if (isTyping) return;
+    setIsTyping(true);
+    
+    const suffix = "ted with thanks";
+    let current = "No";
+    
+    for (let i = 0; i < suffix.length; i++) {
+      await new Promise(res => setTimeout(res, 80));
+      current += suffix[i];
+      setNoButtonText(current);
+    }
+    
+    // Pause for a moment after typing
+    await new Promise(res => setTimeout(res, 1200));
+    handleAction(AppScreen.SUCCESS);
+  };
+
   const renderContent = () => {
     const iconBaseSize = isLandscape ? 60 : 85;
     switch (screen) {
@@ -153,10 +175,17 @@ const App: React.FC = () => {
             <p className="text-lg md:text-2xl text-[#5d4037] mb-0 md:mb-1 storybook-font">So I thought to ask you</p>
             <p className="text-sm md:text-lg text-[#8d6e63] mb-2 md:mb-4 italic landscape-hide">very politely, and with plenty of fun</p>
             <h2 className="text-2xl md:text-4xl text-[#d4a017] mb-4 md:mb-6 font-bold storybook-font">Would you be my Valentine? 💛</h2>
-            <div className={`flex ${isLandscape ? 'flex-row gap-2' : 'flex-col gap-2'} w-full max-w-xs md:max-w-md`}>
-              <button onClick={() => handleAction(AppScreen.SUCCESS)} className="flex-1 bg-[#fbc02d] text-[#5d4037] py-2 rounded-full text-sm md:text-xl hand-drawn-border hover:bg-[#fdd835] transition-all shadow-md"><span>🍯</span> Yes</button>
-              <button onClick={() => handleAction(AppScreen.SUCCESS)} className="flex-1 bg-[#fff176] text-[#5d4037] py-2 rounded-full text-sm md:text-xl hand-drawn-border hover:bg-[#fff59d] transition-all shadow-md"><span>🌻</span> Definitely</button>
-              <button onClick={() => handleAction(AppScreen.SUCCESS)} className="flex-1 bg-[#ffd54f] text-[#5d4037] py-2 rounded-full text-sm md:text-xl hand-drawn-border hover:bg-[#ffca28] transition-all shadow-md"><span>🐝</span> Always</button>
+            <div className={`grid ${isLandscape ? 'grid-cols-2 gap-2' : 'grid-cols-1 gap-2'} w-full max-w-xs md:max-w-md`}>
+              <button onClick={() => handleAction(AppScreen.SUCCESS)} className="bg-[#fbc02d] text-[#5d4037] py-2 rounded-full text-sm md:text-xl hand-drawn-border hover:bg-[#fdd835] transition-all shadow-md"><span>🍯</span> Yes</button>
+              <button onClick={() => handleAction(AppScreen.SUCCESS)} className="bg-[#fff176] text-[#5d4037] py-2 rounded-full text-sm md:text-xl hand-drawn-border hover:bg-[#fff59d] transition-all shadow-md"><span>🌻</span> Definitely</button>
+              <button onClick={() => handleAction(AppScreen.SUCCESS)} className="bg-[#ffd54f] text-[#5d4037] py-2 rounded-full text-sm md:text-xl hand-drawn-border hover:bg-[#ffca28] transition-all shadow-md"><span>🐝</span> Always</button>
+              <button 
+                onClick={handleNoClick} 
+                className={`transition-all duration-300 py-2 rounded-full text-sm md:text-xl hand-drawn-border shadow-md flex items-center justify-center gap-2 bg-[#ffecb3] text-[#5d4037] hover:bg-[#ffe082] ${isTyping ? 'scale-105' : ''}`}
+              >
+                <span>{isTyping ? '🍯' : '☁️'}</span>
+                <span className="whitespace-nowrap min-w-[3ch]">{noButtonText}</span>
+              </button>
             </div>
           </div>
         );
@@ -193,7 +222,7 @@ const App: React.FC = () => {
 
       {/* Main Content Container */}
       <div 
-        className="relative z-10 w-[94%] max-w-lg bg-white/35 backdrop-blur-md rounded-[2.5rem] hand-drawn-border shadow-2xl transition-all duration-500 no-scrollbar overflow-hidden" 
+        className="relative z-10 w-[94%] max-w-lg bg-white/75 backdrop-blur-md rounded-[2.5rem] hand-drawn-border shadow-2xl transition-all duration-500 no-scrollbar overflow-hidden" 
         style={{ 
           transform: `scale(${scaleFactor})`, 
           transformOrigin: 'center center', 
