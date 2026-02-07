@@ -1,10 +1,16 @@
 
 import React from 'react';
 
-export const HoneyPot: React.FC<{ className?: string }> = ({ className }) => (
+interface IconProps {
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export const HoneyPot: React.FC<IconProps> = ({ className, style }) => (
   <svg
     viewBox="0 0 120 150"
     className={className}
+    style={style}
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
@@ -81,10 +87,11 @@ export const HoneyPot: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-export const Bee: React.FC<{ className?: string }> = ({ className }) => (
+export const Bee: React.FC<IconProps> = ({ className, style }) => (
   <svg
     viewBox="0 0 80 60"
     className={className}
+    style={style}
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
@@ -179,10 +186,11 @@ export const Bee: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-export const Flower: React.FC<{ className?: string }> = ({ className }) => (
+export const Flower: React.FC<IconProps> = ({ className, style }) => (
   <svg
     viewBox="0 0 80 80"
     className={className}
+    style={style}
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
@@ -251,4 +259,3 @@ export const Flower: React.FC<{ className?: string }> = ({ className }) => (
     />
   </svg>
 );
-
