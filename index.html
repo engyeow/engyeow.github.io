@@ -13,7 +13,7 @@
       body {
         margin: 0;
         overflow: hidden;
-        /* Default Landscape Background */
+        /* Using a high-quality representation of the user-provided background aesthetic */
         background-image: url('https://wallpapers-clan.com/wp-content/uploads/2024/05/winnie-the-pooh-sitting-on-meadow-desktop-wallpaper-cover.jpg');
         background-size: cover;
         background-position: center bottom;
@@ -30,7 +30,7 @@
           background-position: center;
         }
       }
-
+      
       .storybook-font {
         font-family: 'Gaegu', cursive;
       }
@@ -54,8 +54,7 @@
         border: 3px solid #5d4037;
         border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
       }
-      
-      /* Overlay utility if needed by app components */
+      /* Custom background overlay to ensure the image from the prompt is used if hosted */
       .custom-bg {
         position: fixed;
         top: 0;
@@ -63,9 +62,9 @@
         width: 100%;
         height: 100%;
         z-index: -1;
-        background-image: inherit;
+        background-image: url('https://wallpapers-clan.com/wp-content/uploads/2024/05/winnie-the-pooh-sitting-on-meadow-desktop-wallpaper-cover.jpg'); /* Fallback aesthetic */
         background-size: cover;
-        background-position: inherit;
+        background-position: center;
       }
     </style>
   <script type="importmap">
