@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { AppScreen, HoneyDrop } from './types';
-import { HoneyPot, Bee, Flower } from './components/Illustrations';
+import { HoneyPot, Bee, Flower } from './Illustrations';
 
 const App: React.FC = () => {
   const [screen, setScreen] = useState<AppScreen>(AppScreen.OPENING);
