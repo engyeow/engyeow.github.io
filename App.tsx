@@ -10,7 +10,6 @@ const App: React.FC = () => {
   const [idleText, setIdleText] = useState<string>('');
   const [clickCount, setClickCount] = useState(0);
   const [honeyDrops, setHoneyDrops] = useState<HoneyDrop[]>([]);
-  const [isPortrait, setIsPortrait] = useState(false);
   const [scaleFactor, setScaleFactor] = useState(1);
   const [isInAppBrowser, setIsInAppBrowser] = useState(false);
   
@@ -21,24 +20,20 @@ const App: React.FC = () => {
       const width = window.innerWidth;
       const height = window.innerHeight;
       
-      // 1. Detect if the user is in portrait mode on a mobile-sized screen
-      setIsPortrait(height > width && width < 1024);
+      // Calculate dynamic scale factor based on both width and height
+      // to ensure the container fits in any orientation (Portrait or Landscape).
+      const baseHeight = 750; // Reference height to fit all content (especially SUCCESS screen)
+      const baseWidth = 600;  // Reference width for portrait
       
-      // 2. Calculate dynamic scale factor for landscape
-      if (width > height) {
-        const baseHeight = 700;
-        const baseWidth = 800;
-        
-        const hScale = height / baseHeight;
-        const wScale = width / baseWidth;
-        
-        const newScale = Math.max(0.5, Math.min(1, Math.min(hScale, wScale)));
-        setScaleFactor(newScale);
-      } else {
-        setScaleFactor(1);
-      }
+      const hScale = height / baseHeight;
+      const wScale = width / baseWidth;
+      
+      // Use the smaller scale factor to ensure everything fits.
+      // We cap the scale at 1.0 but allow it to shrink down significantly for small phones.
+      const newScale = Math.max(0.4, Math.min(1, Math.min(hScale, wScale)));
+      setScaleFactor(newScale);
 
-      // 3. Detect In-App Browsers
+      // Detect In-App Browsers
       const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
       const isTelegram = /Telegram/i.test(ua);
       const isInstagram = /Instagram/i.test(ua);
@@ -180,7 +175,6 @@ const App: React.FC = () => {
               I promise to be kind, and to share my honey.
             </p>
             
-            {/* The Specific Invitation */}
             <div className="bg-[#fffde7] p-5 rounded-2xl hand-drawn-border shadow-md mb-6 max-w-sm w-full border-[#d4a017]">
               <div className="text-[#d4a017] text-2xl mb-1">🔥</div>
               <h3 className="text-[#5d4037] text-xl font-bold storybook-font mb-2">Our Date Invitation:</h3>
@@ -205,24 +199,11 @@ const App: React.FC = () => {
       onClick={() => { setClickCount(prev => prev + 1); resetIdleTimer(); }}
     >
       {/* Subtle In-App Browser Tooltip */}
-      {isInAppBrowser && !isPortrait && (
+      {isInAppBrowser && (
         <div className="fixed top-2 left-1/2 -translate-x-1/2 z-[110] bg-[#fffde7]/90 px-5 py-1.5 rounded-full border-2 border-[#fbc02d] shadow-md pointer-events-none">
-          <p className="text-[#5d4037] text-sm storybook-font font-bold whitespace-nowrap">
-             🍯 Tip: For a bigger story, open in Chrome or Safari!
+          <p className="text-[#5d4037] text-xs md:text-sm storybook-font font-bold whitespace-nowrap">
+             🍯 Tip: Open in Browser for the best experience!
           </p>
-        </div>
-      )}
-
-      {/* Mobile Orientation Lock Alert */}
-      {isPortrait && (
-        <div className="fixed inset-0 z-[100] bg-[#fff9e6] flex flex-col items-center justify-center text-center p-10 animate-in fade-in duration-300">
-          <Bee className="w-24 h-24 mb-6 floating" />
-          <h2 className="text-4xl text-[#5d4037] storybook-font font-bold mb-4">Oh Bother!</h2>
-          <p className="text-2xl text-[#8d6e63] storybook-font">
-            This story is much better told sideways.<br/>
-            Please rotate your device to landscape mode!
-          </p>
-          <div className="mt-10 w-24 h-14 border-4 border-[#5d4037] rounded-lg animate-pulse rotate-90" />
         </div>
       )}
 
@@ -244,40 +225,37 @@ const App: React.FC = () => {
         </div>
       ))}
 
-      {/* Main Story Container - Absolute Centering and Dynamic Scaling */}
+      {/* Main Story Container - Absolute Centering and Global Scale Factor */}
       <div 
-        className={`relative z-10 w-[95%] max-w-2xl bg-white/90 backdrop-blur-md rounded-[3rem] hand-drawn-border shadow-2xl transition-all duration-700 ${isPortrait ? 'blur-md opacity-0' : 'opacity-100'} overflow-y-auto max-h-[95vh]`}
+        className="relative z-10 w-[95%] max-w-2xl bg-white/90 backdrop-blur-md rounded-[3rem] hand-drawn-border shadow-2xl transition-all duration-700 overflow-hidden flex flex-col items-center justify-center"
         style={{ 
           transform: `scale(${scaleFactor})`,
           transformOrigin: 'center center',
-          padding: `3rem` 
+          padding: `2rem`,
+          maxHeight: '98vh' // Tight constraint to avoid overscroll
         }}
       >
         {renderScreen()}
       </div>
 
       {/* Idle Easter Egg Text */}
-      {!isPortrait && (
-        <div className="fixed bottom-10 left-0 w-full text-center pointer-events-none px-4 z-20">
-          {idleText && (
-            <p className="text-white text-xl md:text-3xl animate-bounce storybook-font font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-              {idleText}
-            </p>
-          )}
-          {clickCount > 10 && screen !== AppScreen.SUCCESS && (
-            <p className="text-[#fbc02d] text-lg storybook-font italic font-bold drop-shadow-md">
-               "Sometimes the smallest things take up the most room in your heart."
-            </p>
-          )}
-        </div>
-      )}
+      <div className="fixed bottom-10 left-0 w-full text-center pointer-events-none px-4 z-20">
+        {idleText && (
+          <p className="text-white text-xl md:text-3xl animate-bounce storybook-font font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+            {idleText}
+          </p>
+        )}
+        {clickCount > 15 && screen !== AppScreen.SUCCESS && (
+          <p className="text-[#fbc02d] text-base md:text-lg storybook-font italic font-bold drop-shadow-md">
+             "Sometimes the smallest things take up the most room in your heart."
+          </p>
+        )}
+      </div>
 
-      {/* Decorative Signature */}
-      {!isPortrait && (
-        <div className="fixed bottom-6 right-8 text-white/80 text-lg md:text-2xl storybook-font font-bold drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] z-20">
-          With Love, From Pooh • 2026
-        </div>
-      )}
+      {/* Decorative Signature - Hidden on very small screens to save space */}
+      <div className="fixed bottom-4 right-6 text-white/80 text-sm md:text-2xl storybook-font font-bold drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] z-20 hidden sm:block">
+        With Love, From Pooh • 2026
+      </div>
     </div>
   );
 };
