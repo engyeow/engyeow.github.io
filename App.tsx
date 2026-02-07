@@ -25,17 +25,20 @@ const App: React.FC = () => {
       setIsPortrait(height > width && width < 1024);
       
       // 2. Calculate dynamic scale factor for landscape
-      // We target a comfortable height of 650px.
       if (width > height) {
-        const baseHeight = 650;
-        // Shrink the UI proportionally down to 60% of original size if the screen is very short (like Telegram in-app)
-        const newScale = Math.max(0.6, Math.min(1, height / baseHeight));
+        const baseHeight = 700;
+        const baseWidth = 800;
+        
+        const hScale = height / baseHeight;
+        const wScale = width / baseWidth;
+        
+        const newScale = Math.max(0.5, Math.min(1, Math.min(hScale, wScale)));
         setScaleFactor(newScale);
       } else {
         setScaleFactor(1);
       }
 
-      // 3. Detect In-App Browsers to provide helpful context if needed
+      // 3. Detect In-App Browsers
       const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
       const isTelegram = /Telegram/i.test(ua);
       const isInstagram = /Instagram/i.test(ua);
@@ -52,7 +55,6 @@ const App: React.FC = () => {
     if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
     setIdleText('');
     
-    // If not on the success screen, remind them Pooh is waiting
     if (screen !== AppScreen.SUCCESS) {
       idleTimerRef.current = setTimeout(() => {
         setIdleText('Pooh is waiting patiently. Mostly.');
@@ -86,8 +88,7 @@ const App: React.FC = () => {
   };
 
   const renderScreen = () => {
-    // Dynamic icon size based on scaleFactor
-    const iconSize = 90 * scaleFactor;
+    const iconSize = 90;
     
     switch (screen) {
       case AppScreen.OPENING:
@@ -154,6 +155,12 @@ const App: React.FC = () => {
               >
                 <span>🌻</span> Yes (with lots of food!)
               </button>
+              <button
+                onClick={() => handleScreenTransition(AppScreen.SUCCESS)}
+                className="bg-[#ffd54f] text-[#5d4037] py-3 md:py-4 rounded-full text-lg md:text-xl hand-drawn-border hover:bg-[#ffca28] transition-all shadow-md flex items-center justify-center gap-2"
+              >
+                <span>🐝</span> Yes (forever and always)
+              </button>
             </div>
           </div>
         );
@@ -161,19 +168,30 @@ const App: React.FC = () => {
       case AppScreen.SUCCESS:
         return (
           <div className="flex flex-col items-center text-center px-4 z-10 animate-in fade-in zoom-in-50 duration-1000">
-            <div className="flex gap-4 mb-4 items-end">
-              <HoneyPot style={{ width: iconSize, height: iconSize * 1.2 }} className="floating" />
-              <Bee style={{ width: iconSize * 0.6, height: iconSize * 0.6 }} className="animate-bounce" />
+            <div className="flex gap-4 mb-2 items-end">
+              <HoneyPot style={{ width: iconSize * 0.8, height: iconSize }} className="floating" />
+              <Bee style={{ width: iconSize * 0.5, height: iconSize * 0.5 }} className="animate-bounce" />
             </div>
-            <h1 className="text-3xl md:text-5xl text-[#5d4037] mb-4 storybook-font font-bold">
+            <h1 className="text-2xl md:text-4xl text-[#5d4037] mb-2 storybook-font font-bold">
               Oh bother… how wonderful!
             </h1>
-            <p className="text-lg md:text-2xl text-[#5d4037] mb-6 leading-relaxed max-w-md font-bold">
+            <p className="text-lg md:text-xl text-[#5d4037] mb-4 leading-relaxed max-w-md font-bold">
               I’m very glad I asked.<br/>
-              I promise to be brave, kind,<br/>
-              and to always share my honey.
+              I promise to be kind, and to share my honey.
             </p>
-            <div className="p-5 bg-[#fffde7]/95 rounded-2xl border-2 border-dashed border-[#fbc02d] storybook-font text-xl md:text-2xl text-[#5d4037] max-w-md shadow-inner italic">
+            
+            {/* The Specific Invitation */}
+            <div className="bg-[#fffde7] p-5 rounded-2xl hand-drawn-border shadow-md mb-6 max-w-sm w-full border-[#d4a017]">
+              <div className="text-[#d4a017] text-2xl mb-1">🔥</div>
+              <h3 className="text-[#5d4037] text-xl font-bold storybook-font mb-2">Our Date Invitation:</h3>
+              <p className="text-[#5d4037] text-lg font-bold leading-snug">
+                Fireplace by Bedrock,<br/>
+                One Holland Village #03-27<br/>
+                <span className="text-[#d4a017]">7PM • 14 February 2026</span>
+              </p>
+            </div>
+
+            <div className="p-4 bg-white/60 rounded-xl border border-dashed border-[#fbc02d] storybook-font text-lg text-[#5d4037] max-w-md shadow-inner italic">
               {POOH_QUOTE}
             </div>
           </div>
@@ -183,7 +201,7 @@ const App: React.FC = () => {
 
   return (
     <div 
-      className="min-h-screen w-full flex items-center justify-center relative overflow-hidden cursor-default"
+      className="fixed inset-0 w-full h-full flex items-center justify-center overflow-hidden cursor-default"
       onClick={() => { setClickCount(prev => prev + 1); resetIdleTimer(); }}
     >
       {/* Subtle In-App Browser Tooltip */}
@@ -226,13 +244,13 @@ const App: React.FC = () => {
         </div>
       ))}
 
-      {/* Main Story Container (Dynamic Scaling) */}
+      {/* Main Story Container - Absolute Centering and Dynamic Scaling */}
       <div 
-        className={`relative z-10 w-full max-w-2xl bg-white/90 backdrop-blur-md rounded-[3rem] hand-drawn-border mx-4 shadow-2xl transition-all duration-700 ${isPortrait ? 'blur-md opacity-0' : 'opacity-100'}`}
+        className={`relative z-10 w-[95%] max-w-2xl bg-white/90 backdrop-blur-md rounded-[3rem] hand-drawn-border shadow-2xl transition-all duration-700 ${isPortrait ? 'blur-md opacity-0' : 'opacity-100'} overflow-y-auto max-h-[95vh]`}
         style={{ 
           transform: `scale(${scaleFactor})`,
           transformOrigin: 'center center',
-          padding: `${3 * scaleFactor}rem` 
+          padding: `3rem` 
         }}
       >
         {renderScreen()}
@@ -240,7 +258,7 @@ const App: React.FC = () => {
 
       {/* Idle Easter Egg Text */}
       {!isPortrait && (
-        <div className="fixed bottom-10 left-0 w-full text-center pointer-events-none px-4">
+        <div className="fixed bottom-10 left-0 w-full text-center pointer-events-none px-4 z-20">
           {idleText && (
             <p className="text-white text-xl md:text-3xl animate-bounce storybook-font font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
               {idleText}
@@ -256,7 +274,7 @@ const App: React.FC = () => {
 
       {/* Decorative Signature */}
       {!isPortrait && (
-        <div className="fixed bottom-6 right-8 text-white/80 text-lg md:text-2xl storybook-font font-bold drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
+        <div className="fixed bottom-6 right-8 text-white/80 text-lg md:text-2xl storybook-font font-bold drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] z-20">
           With Love, From Pooh • 2026
         </div>
       )}
