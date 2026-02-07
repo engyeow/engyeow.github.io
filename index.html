@@ -13,13 +13,14 @@
         box-sizing: border-box;
         margin: 0;
         padding: 0;
+        -webkit-tap-highlight-color: transparent;
       }
       html, body {
         overflow: hidden;
         width: 100%;
         height: 100%;
         position: fixed;
-        -webkit-overflow-scrolling: touch;
+        touch-action: none; /* Prevents all touch gestures from scrolling */
       }
       body {
         background-image: url('https://wallpapers-clan.com/wp-content/uploads/2024/05/winnie-the-pooh-sitting-on-meadow-desktop-wallpaper-cover.jpg');
@@ -68,6 +69,16 @@
 
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      
+      /* Scale reduction for very small landscape heights */
+      @media (max-height: 450px) {
+        .landscape-compact {
+          gap: 0.25rem !important;
+        }
+        .landscape-hide {
+          display: none !important;
+        }
+      }
     </style>
     <script type="importmap">
     {
@@ -79,11 +90,9 @@
       }
     }
     </script>
-  <link rel="stylesheet" href="/index.css">
-</head>
+  </head>
   <body>
     <div id="root"></div>
     <script type="module" src="./index.tsx"></script>
-  <script type="module" src="/index.tsx"></script>
-</body>
+  </body>
 </html>
