@@ -1,15 +1,28 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { AppScreen, HoneyDrop } from './types';
-import { HoneyPot, Bee, Flower } from './Illustrations';
+import { HoneyPot, Bee, Flower } from './components/Illustrations';
 
 const App: React.FC = () => {
   const [screen, setScreen] = useState<AppScreen>(AppScreen.OPENING);
   const [idleText, setIdleText] = useState<string>('');
   const [clickCount, setClickCount] = useState(0);
   const [honeyDrops, setHoneyDrops] = useState<HoneyDrop[]>([]);
+  const [isPortrait, setIsPortrait] = useState(false);
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [poohQuote] = useState<string>("\"A day without a friend is like a pot without a single drop of honey left inside.\"");
+
+  // Handle Orientation check
+  useEffect(() => {
+    const checkOrientation = () => {
+      // We consider it "portrait" if height > width and it's a mobile-like screen size
+      setIsPortrait(window.innerHeight > window.innerWidth && window.innerWidth < 1024);
+    };
+
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+    return () => window.removeEventListener('resize', checkOrientation);
+  }, []);
 
   const resetIdleTimer = useCallback(() => {
     if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
@@ -30,6 +43,17 @@ const App: React.FC = () => {
   }, [resetIdleTimer]);
 
   const handleScreenTransition = (next: AppScreen) => {
+    // Best effort to lock orientation on user gesture if supported
+    try {
+      if (window.screen && window.screen.orientation && (window.screen.orientation as any).lock) {
+        (window.screen.orientation as any).lock('landscape').catch(() => {
+          // Silent catch: browsers often block this without fullscreen
+        });
+      }
+    } catch (e) {
+      console.log("Orientation lock not supported");
+    }
+
     setScreen(next);
     setClickCount(0);
     if (next === AppScreen.SUCCESS) {
@@ -156,7 +180,19 @@ const App: React.FC = () => {
       className="min-h-screen w-full flex items-center justify-center relative overflow-hidden cursor-default"
       onClick={handleRandomClick}
     >
-      
+      {/* Forced Orientation Overlay */}
+      {isPortrait && (
+        <div className="fixed inset-0 z-[100] bg-[#fff9e6] flex flex-col items-center justify-center text-center p-10 animate-in fade-in duration-300">
+          <Bee className="w-24 h-24 mb-6 floating" />
+          <h2 className="text-4xl text-[#5d4037] storybook-font font-bold mb-4">Oh Bother!</h2>
+          <p className="text-2xl text-[#8d6e63] storybook-font">
+            This story is much better told sideways.<br/>
+            Please rotate your device to landscape mode!
+          </p>
+          <div className="mt-10 w-20 h-12 border-4 border-[#5d4037] rounded-lg animate-pulse rotate-90" />
+        </div>
+      )}
+
       {/* Success Animation */}
       {screen === AppScreen.SUCCESS && honeyDrops.map(drop => (
         <div 
@@ -175,27 +211,29 @@ const App: React.FC = () => {
         </div>
       ))}
 
-      {/* Main Container - Slightly higher opacity to contrast with the lush background image */}
-      <div className="relative z-10 w-full max-w-2xl bg-white/75 backdrop-blur-sm p-10 md:p-16 rounded-[3rem] hand-drawn-border mx-4 shadow-2xl transition-all duration-500">
+      {/* Main Container */}
+      <div className={`relative z-10 w-full max-w-2xl bg-white/75 backdrop-blur-sm p-10 md:p-16 rounded-[3rem] hand-drawn-border mx-4 shadow-2xl transition-all duration-500 ${isPortrait ? 'blur-md' : ''}`}>
         {renderScreen()}
       </div>
 
       {/* Easter Egg Messages */}
-      <div className="fixed bottom-12 left-0 w-full text-center pointer-events-none px-4">
-        {idleText && (
-          <p className="text-[#5d4037] text-2xl animate-bounce storybook-font font-bold drop-shadow-md">
-            {idleText}
-          </p>
-        )}
-        {clickCount > 5 && screen !== AppScreen.SUCCESS && (
-          <p className="text-[#5d4037] text-lg storybook-font italic font-bold">
-            Thinking… thinking… still thinking very hard…
-          </p>
-        )}
-      </div>
+      {!isPortrait && (
+        <div className="fixed bottom-12 left-0 w-full text-center pointer-events-none px-4">
+          {idleText && (
+            <p className="text-[#5d4037] text-2xl animate-bounce storybook-font font-bold drop-shadow-md">
+              {idleText}
+            </p>
+          )}
+          {clickCount > 5 && screen !== AppScreen.SUCCESS && (
+            <p className="text-[#5d4037] text-lg storybook-font italic font-bold">
+              Thinking… thinking… still thinking very hard…
+            </p>
+          )}
+        </div>
+      )}
 
-      {/* Footer Quote Style - Updated to 2026 */}
-      {screen !== AppScreen.SUCCESS && (
+      {/* Footer Quote Style */}
+      {screen !== AppScreen.SUCCESS && !isPortrait && (
         <div className="fixed bottom-6 right-6 text-white text-xl storybook-font font-bold drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
           Hundred Acre Wood, 2026
         </div>
